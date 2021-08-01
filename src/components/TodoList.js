@@ -1,30 +1,41 @@
-import React from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { counterState, todoListState } from '../recoil/todo';
+import React, { useState } from 'react';
+import { useRecoilState } from 'recoil';
+import { todoListState } from '../recoil/todo';
 import TodoItem from './TodoItem';
 import TodoInsert from './TodoInsert';
 
 const TodoList = () => {
-  const [counter, setCounter] = useRecoilState(counterState);
-  const todoList = useRecoilValue(todoListState);
+  const [inputValue, setValue] = useState('');
+  const [todoList, setTodoList] = useRecoilState(todoListState);
   const onChangeValue = (e) => {
     const value = e.target.value;
-    console.log(value);
+    setValue(value);
   };
   const onSubmitForm = () => {
-    console.log('입력');
+    setTodoList((oldList) => [
+      ...oldList,
+      {
+        id: oldList.length ? oldList[oldList.length - 1].id + 1 : 1,
+        value: inputValue
+      }
+    ]);
+    setValue('');
   };
-  const onChangeCounter = () => {
-    setCounter(counter + 1);
+  const onDelete = (id) => {
+    setTodoList((oldList) => {
+      return oldList.filter((item) => item.id !== id);
+    });
   };
   return (
     <div>
-      <button onClick={onChangeCounter}>카운터</button>
-      <div>{counter}</div>
-      <TodoInsert onChangeValue={onChangeValue} onSubmitForm={onSubmitForm} />
+      <TodoInsert
+        onChangeValue={onChangeValue}
+        onSubmitForm={onSubmitForm}
+        value={inputValue}
+      />
       <ul>
         {todoList.map((item) => (
-          <TodoItem key={item.id} todoItem={item} />
+          <TodoItem key={item.id} todoItem={item} onDelete={onDelete} />
         ))}
       </ul>
     </div>
